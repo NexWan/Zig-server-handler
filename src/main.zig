@@ -5,6 +5,7 @@ const funcs = @import("cli.zig").funcs;
 const commands = @import("commands.zig").commands;
 const reqTypes = @import("requests.zig").RequestType;
 const requests = @import("requests.zig");
+const initConfig = @import("utils.zig").InitCheck;
 
 var gpa = std.heap.GeneralPurposeAllocator(.***REMOVED******REMOVED***)***REMOVED******REMOVED***;
 const allocator = gpa.allocator();
@@ -58,6 +59,8 @@ pub fn main() !void ***REMOVED***
     ***REMOVED***
 ***REMOVED***
 
+
+
 /// Prints the playing box in the terminal
 pub fn printPlayingBox() !void ***REMOVED***
     try cli.printFmt(playingBoxInit, colors.green);
@@ -71,8 +74,23 @@ pub fn printPlayingBox() !void ***REMOVED***
 
 test "HTTP test" ***REMOVED***
     var req = requests.Requests.init(allocator);
-    const url = "https://whatthecommit.com";
+    const url = "https://whatthecommit.com/index.txt";
     req.get(url) catch |err| ***REMOVED***
         std.debug.print("Error: ***REMOVED***any***REMOVED***\n", .***REMOVED***err***REMOVED***);
     ***REMOVED***;
+***REMOVED***
+
+test "Init config" ***REMOVED***
+    var config = try initConfig.init(allocator);
+    const path = "config.json";
+
+    const parsed = try config.readConfig(path);
+    defer parsed.deinit();
+
+    var root = parsed.value;
+
+    const client = root.object.get("client").?;
+    const secret = root.object.get("token").?;
+    std.debug.print("Client: ***REMOVED***s***REMOVED***\n", .***REMOVED***client.string***REMOVED***);
+    std.debug.print("Secret: ***REMOVED***s***REMOVED***\n", .***REMOVED***secret.string***REMOVED***);
 ***REMOVED***
