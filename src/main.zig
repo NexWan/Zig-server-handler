@@ -3,6 +3,8 @@ const cli = @import("cli.zig").cli;
 const colors = @import("cli.zig").colors;
 const funcs = @import("cli.zig").funcs;
 const commands = @import("commands.zig").commands;
+const reqTypes = @import("requests.zig").RequestType;
+const requests = @import("requests.zig");
 
 var gpa = std.heap.GeneralPurposeAllocator(.***REMOVED******REMOVED***)***REMOVED******REMOVED***;
 const allocator = gpa.allocator();
@@ -56,6 +58,7 @@ pub fn main() !void ***REMOVED***
     ***REMOVED***
 ***REMOVED***
 
+/// Prints the playing box in the terminal
 pub fn printPlayingBox() !void ***REMOVED***
     try cli.printFmt(playingBoxInit, colors.green);
     try cli.printFmt("\n    Now Playing: ", colors.yellow);
@@ -66,9 +69,10 @@ pub fn printPlayingBox() !void ***REMOVED***
     try cli.println("");
 ***REMOVED***
 
-test "simple test" ***REMOVED***
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+test "HTTP test" ***REMOVED***
+    var req = requests.Requests.init(allocator);
+    const url = "https://whatthecommit.com";
+    req.get(url) catch |err| ***REMOVED***
+        std.debug.print("Error: ***REMOVED***any***REMOVED***\n", .***REMOVED***err***REMOVED***);
+    ***REMOVED***;
 ***REMOVED***

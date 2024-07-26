@@ -27,7 +27,6 @@ pub const commands = struct ***REMOVED***
     \\ - exit - exit the program
 ;
 
-
     pub fn handleCommand(comm: []u8) ![*:0]const u8 ***REMOVED***
         // Trim whitespace and convert the input command to lowercase
         const trimmed_comm = std.mem.trim(u8, comm, " \t\n\r");        
