@@ -97,8 +97,15 @@ test "Init config" ***REMOVED***
     std.debug.print("Secret: ***REMOVED***s***REMOVED***\n", .***REMOVED***secret.string***REMOVED***);
 ***REMOVED***
 
-//test "Check file exists" ***REMOVED***
-//    const path = "config.json";
-//    const exists = try initConfig.checkConfigExists(path);
-//    std.debug.print("Exists: ***REMOVED***any***REMOVED***\n", .***REMOVED***exists***REMOVED***);
-//***REMOVED***
+test "Check file exists" ***REMOVED***
+    var config = try initConfig.init(allocator);
+    const path = "config.json";
+    const exists = try config.checkConfigExists(path);
+    std.debug.print("Exists: ***REMOVED***any***REMOVED***\n", .***REMOVED***exists.exists***REMOVED***);
+***REMOVED***
+
+test "Write to JSON" ***REMOVED***
+    const path = "config.json";
+    var config = try initConfig.init(allocator);
+    try config.writeInitSettings(path);
+***REMOVED***

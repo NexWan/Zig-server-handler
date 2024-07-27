@@ -10,6 +10,11 @@ pub const InitCheck = struct ***REMOVED***
         path: []const u8,
     ***REMOVED***;
 
+    const initConfig = struct ***REMOVED***
+        token: []const u8,
+        client: []const u8,
+    ***REMOVED***;
+
     const Config = struct ***REMOVED***
         root: []const u8,
     ***REMOVED***;
@@ -36,6 +41,30 @@ pub const InitCheck = struct ***REMOVED***
         ***REMOVED***else ***REMOVED***
             return returnFileType***REMOVED*** .exists = true, .path = abs_path ***REMOVED***;
         ***REMOVED***
+    ***REMOVED***
+
+    pub fn writeInitSettings(self:*InitCheck, path: []const u8) !void***REMOVED***
+        const data = initConfig***REMOVED***
+            .token = "your token here",
+            .client = "your client here",
+        ***REMOVED***;
+        
+        // Set up pretty-print options
+        const options = std.json.StringifyOptions***REMOVED***
+            .whitespace = .indent_4,
+        ***REMOVED***;
+
+        var string = std.ArrayList(u8).init(self.allocator);
+        try std.json.stringify(data, options, string.writer());
+        var file = try std.fs.cwd().createFile(path, .***REMOVED******REMOVED***);
+        defer file.close();
+
+
+        // Convert the string to an owned slice and handle potential errors
+        const ownedSlice = try string.toOwnedSlice();
+
+        // Write the JSON string to the file
+        try file.writeAll(ownedSlice);
     ***REMOVED***
 
     pub fn readConfig(self:*InitCheck, path: []const u8) !std.json.Parsed(std.json.Value) ***REMOVED***
