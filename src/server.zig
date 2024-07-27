@@ -75,24 +75,49 @@ pub const ServerS = struct ***REMOVED***
         proto = mem.trim(u8, proto, " \r\n");
         std.debug.print("proto: ***REMOVED***s***REMOVED***\n", .***REMOVED***proto***REMOVED***);
         //if (!mem.eql(u8, proto, "HTTP/1.1")) return ServerFileError.ProtocolNotSupported;
-        if(mem.eql(u8,path,"/")) return "index.html";
+        if(mem.eql(u8,path,"/")) return "/index.html";
         return path;
     ***REMOVED***
 
-    pub fn openLocalFile(path: []const u8) ![]const u8 ***REMOVED***
-        const localPath = path[1..];
-        const file = fs.cwd().openFile(localPath, .***REMOVED******REMOVED***) catch |err| switch (err) ***REMOVED***
-            error.FileNotFound => ***REMOVED***
-                std.debug.print("File not found: ***REMOVED***s***REMOVED***\n", .***REMOVED***localPath***REMOVED***);
-                return error.FileNotFound;
-            ***REMOVED***,
-            else => return err,
-        ***REMOVED***;
-        defer file.close();
-        std.debug.print("file: ***REMOVED***any***REMOVED***\n", .***REMOVED***file***REMOVED***);
+    /// Weird implementation of opening the file at the server
+    /// If the file ends with .html, it will open the file as is
+    /// If not, it will append .html to the file and try opening it again
+    /// If the file is not found, it will return a 404 error
+    /// Not the best implementation, but it works for now
+    pub fn openLocalFile(path: []const u8, allocator: anytype) ![]const u8 ***REMOVED***
         const memory = std.heap.page_allocator;
         const maxSize = std.math.maxInt(usize);
-        return try file.readToEndAlloc(memory, maxSize);
+        const localPath = path[1..];
+        const endsWithHtml = checkFileEndsWithHtml(localPath);
+        
+        if (endsWithHtml) ***REMOVED***
+            std.debug.print("HTML file ***REMOVED***s***REMOVED***\n", .***REMOVED***localPath***REMOVED***);
+            const file = fs.cwd().openFile(localPath, .***REMOVED******REMOVED***) catch |err| switch (err) ***REMOVED***
+                error.FileNotFound => ***REMOVED***
+                    std.debug.print("File not found: ***REMOVED***s***REMOVED***\n", .***REMOVED***localPath***REMOVED***);
+                    return error.FileNotFound;
+                ***REMOVED***,
+                else => return err,
+                ***REMOVED***;
+            defer file.close();
+            std.debug.print("file: ***REMOVED***any***REMOVED***\n", .***REMOVED***file***REMOVED***);
+            return try file.readToEndAlloc(memory, maxSize);
+        ***REMOVED***else ***REMOVED*** //Needs to use GeneralPurposeAllocator to allocate memory, otherwise it will crash
+        // The purpose is to try and mimic must https servers that serve html files without the need of the extension, idk if it's a good idea lol
+            const newPath = try std.fmt.allocPrintZ(allocator, "***REMOVED***s***REMOVED***.html", .***REMOVED***path***REMOVED***);
+            defer allocator.free(newPath);
+            std.debug.print("newPath: ***REMOVED***s***REMOVED***\n", .***REMOVED***newPath***REMOVED***); 
+            const file = fs.cwd().openFile(newPath[1..], .***REMOVED******REMOVED***) catch |err| switch (err) ***REMOVED***
+                error.FileNotFound => ***REMOVED***
+                    std.debug.print("File not found: ***REMOVED***s***REMOVED***\n", .***REMOVED***newPath***REMOVED***);
+                    return error.FileNotFound;
+                ***REMOVED***,
+                else => return err,
+                ***REMOVED***;
+            defer file.close();
+            return try file.readToEndAlloc(memory, maxSize);
+        ***REMOVED***
+        return error.UnkownMimeType;
     ***REMOVED***
 
     pub fn http404() []const u8 ***REMOVED***
@@ -151,7 +176,7 @@ pub const ServerS = struct ***REMOVED***
             const header = try parseHeader(recv_data);
             const path = try parsePath(header.requestLine);
             const mime = mimeForPath(path);
-            const buf = openLocalFile(path) catch |err| ***REMOVED***
+            const buf = openLocalFile(path, self.allocator) catch |err| ***REMOVED***
                 if (err == error.FileNotFound) ***REMOVED***
                     _ = try conn.stream.writer().write(http404());
                     continue;
@@ -171,5 +196,9 @@ pub const ServerS = struct ***REMOVED***
         ***REMOVED*** else |err| ***REMOVED***
             std.debug.print("error in accept: ***REMOVED***any***REMOVED***\n", .***REMOVED***err***REMOVED***);
         ***REMOVED***
+    ***REMOVED***
+
+    pub fn checkFileEndsWithHtml(path: []const u8) bool ***REMOVED***
+        return mem.endsWith(u8, path, ".html");
     ***REMOVED***
 ***REMOVED***;
