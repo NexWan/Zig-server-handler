@@ -11,8 +11,8 @@ pub const InitCheck = struct ***REMOVED***
     ***REMOVED***;
 
     const initConfig = struct ***REMOVED***
-        token: []const u8,
-        client: []const u8,
+        client_id: []const u8,
+        client_secret: []const u8,
     ***REMOVED***;
 
     const Config = struct ***REMOVED***
@@ -45,8 +45,8 @@ pub const InitCheck = struct ***REMOVED***
 
     pub fn writeInitSettings(self:*InitCheck, path: []const u8) !void***REMOVED***
         const data = initConfig***REMOVED***
-            .token = "your token here",
-            .client = "your client here",
+            .client_id = "your token here",
+            .client_secret = "your client here",
         ***REMOVED***;
         
         // Set up pretty-print options
@@ -81,4 +81,24 @@ pub const InitCheck = struct ***REMOVED***
         ***REMOVED***
         return std.json.parseFromSlice(std.json.Value, self.allocator, data, .***REMOVED******REMOVED***);
     ***REMOVED*** 
+***REMOVED***;
+
+pub const Utils = struct ***REMOVED***
+    pub fn generateRandomString(allocator: std.mem.Allocator,length: usize) ![]const u8 ***REMOVED***
+        var rnd = std.rand.DefaultPrng.init(0);
+        const buffer = try allocator.alloc(u8,length);
+        defer allocator.free(buffer);
+
+        for (buffer) |*ptr| ***REMOVED***
+            const random = rnd.next() % 62;
+            if (random < 10) ***REMOVED*** 
+                ptr.* = @intCast(('0') + random);
+            ***REMOVED***
+            else if (random < 36)  ***REMOVED***
+                ptr.* = @intCast(('a') + random - 10);
+            ***REMOVED***
+            else ptr.* = @intCast(('A') + random - 36);
+        ***REMOVED***
+        return buffer;
+    ***REMOVED***
 ***REMOVED***;
