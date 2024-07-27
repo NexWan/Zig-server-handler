@@ -6,6 +6,7 @@ const commands = @import("commands.zig").commands;
 const reqTypes = @import("requests.zig").RequestType;
 const requests = @import("requests.zig");
 const initConfig = @import("utils.zig").InitCheck;
+const Server = @import("server.zig").ServerS;
 
 var gpa = std.heap.GeneralPurposeAllocator(.***REMOVED******REMOVED***)***REMOVED******REMOVED***;
 const allocator = gpa.allocator();
@@ -108,4 +109,9 @@ test "Write to JSON" ***REMOVED***
     const path = "config.json";
     var config = try initConfig.init(allocator);
     try config.writeInitSettings(path);
+***REMOVED***
+
+test "HTTP server" ***REMOVED***
+    var server = Server.init(allocator);
+    _ = try server.start();
 ***REMOVED***
