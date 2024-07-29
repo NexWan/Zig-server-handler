@@ -2,6 +2,7 @@ const std = @import("std");
 const net = std.net;
 const fs = std.fs;
 const mem = std.mem;
+const utils = @import("utils.zig").Utils;
 
 const server_addr = "0.0.0.0";
 const server_port = 8000;
@@ -53,6 +54,7 @@ pub const ServerS = struct {
         var headerIter = mem.tokenizeSequence(u8, header, " \r\n");
         headerStruct.requestLine = headerIter.next() orelse return ServerFileError.HeaderMalFormed;
         while (headerIter.next()) |line| {
+            std.debug.print("line: {s}\n", .{line});
             const nameSlice = mem.sliceTo(line, ':');
             if(nameSlice.len == line.len) return ServerFileError.HeaderMalFormed;
             const headerName = std.meta.stringToEnum(HeaderNames,nameSlice) orelse continue;
@@ -66,6 +68,7 @@ pub const ServerS = struct {
     }
 
     pub fn parsePath(requestLine: []const u8) ![]const u8 {
+        std.debug.print("requestLine: {s}\n", .{requestLine});
         var requestLineIter = mem.tokenizeScalar(u8, requestLine, ' ');
         const method = requestLineIter.next().?;
         if (!mem.eql(u8,method,"GET")) return ServerFileError.MethodNotSupported;
@@ -104,6 +107,9 @@ pub const ServerS = struct {
             return try file.readToEndAlloc(memory, maxSize);
         }else { //Needs to use GeneralPurposeAllocator to allocate memory, otherwise it will crash
         // The purpose is to try and mimic must https servers that serve html files without the need of the extension, idk if it's a good idea lol
+            const randomString = try utils.generateRandomString(allocator, 10);
+            defer allocator.free(randomString);
+            std.debug.print("Random string on server: {s}", .{randomString});
             const newPath = try std.fmt.allocPrintZ(allocator, "{s}.html", .{path});
             defer allocator.free(newPath);
             std.debug.print("newPath: {s}\n", .{newPath}); 
@@ -200,5 +206,36 @@ pub const ServerS = struct {
 
     pub fn checkFileEndsWithHtml(path: []const u8) bool {
         return mem.endsWith(u8, path, ".html");
+    }
+};
+
+pub const Testing = struct {
+    pub fn parseQueryString(url: []const u8) !std.StringHashMap([]const u8) {
+        var map = std.StringHashMap([]const u8).init(std.heap.page_allocator);
+
+        const query_start = std.mem.indexOf(u8, url, "?");
+        if(query_start == null) return error.NoQuery;
+
+        const query_string = url[query_start.? + 1..];
+        var pairs = std.mem.split(u8, query_string, "&");
+
+        
+        while (pairs.next()) |pair| {
+            var kv = std.mem.split(u8, pair, "=");
+            var kv_array: [2][]const u8 = undefined;
+            var i: usize = 0;
+            while (kv.next()) |part| {
+                if (i < 2) {
+                    kv_array[i] = part;
+                }
+                i += 1;
+            }
+            if (i == 2) {
+                try map.put(kv_array[0], kv_array[1]);
+            } else if (i == 1) {
+                try map.put(kv_array[0], "");
+            }
+        }
+        return map;
     }
 };

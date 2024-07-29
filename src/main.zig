@@ -8,6 +8,7 @@ const requests = @import("requests.zig");
 const initConfig = @import("utils.zig").InitCheck;
 const Server = @import("server.zig").ServerS;
 const utils = @import("utils.zig").Utils;
+const ServerTest = @import("server.zig").Testing;
 //const randomString = @cImport(
 //    @cInclude("randomString.h"),
 //);
@@ -126,4 +127,19 @@ test "Generate random string" {
     const randomString = try utils.generateRandomString(allocator,length);
     defer allocator.free(randomString);
     try cli.println(randomString);
+}
+
+test "HTTP server with random string" {
+    var server = Server.init(allocator);
+    _ = try server.start();
+}
+
+test "Slice url"{
+    const url = "https://www.google.com/search?q=zig+programming+language";
+    const map = try ServerTest.parseQueryString(url);
+    
+    var it = map.iterator();
+    while(it.next()) |entry| {
+        std.debug.print("Key: {s}, Value: {s}\n", .{entry.key_ptr.*, entry.value_ptr.*});
+    }
 }
