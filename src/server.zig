@@ -6,66 +6,66 @@ const mem = std.mem;
 const server_addr = "0.0.0.0";
 const server_port = 8000;
 
-pub const ServerS = struct ***REMOVED***
+pub const ServerS = struct {
     server_addr: []const u8,
     server_port: u16,
     allocator: std.mem.Allocator,
 
-    pub const ServerFileError = error***REMOVED***
+    pub const ServerFileError = error{
         HeaderMalFormed,
         MethodNotSupported,
         ProtocolNotSupported,
         UnkownMimeType,
-    ***REMOVED***;
+    };
 
-    const mimeTypes = .***REMOVED***
-        .***REMOVED***"html", "text/html"***REMOVED***,
-        .***REMOVED***"css", "text/css"***REMOVED***,
-        .***REMOVED***".png", "image/png"***REMOVED***,
-        .***REMOVED***".jpg", "image/jpeg"***REMOVED***,
-        .***REMOVED***".jpeg", "image/jpeg"***REMOVED***,
-    ***REMOVED***;
+    const mimeTypes = .{
+        .{"html", "text/html"},
+        .{"css", "text/css"},
+        .{".png", "image/png"},
+        .{".jpg", "image/jpeg"},
+        .{".jpeg", "image/jpeg"},
+    };
 
-    const HeaderNames = enum ***REMOVED***
+    const HeaderNames = enum {
         Host,
         @"User-Agent",
-    ***REMOVED***;
+    };
 
-    const HTTPHeader = struct ***REMOVED***
+    const HTTPHeader = struct {
         requestLine: []const u8,
         host: []const u8,
         userAgent: []const u8,
 
-        pub fn print(self: HTTPHeader) void ***REMOVED***
-            std.debug.print("***REMOVED***s***REMOVED*** - ***REMOVED***s***REMOVED***\n", .***REMOVED***
+        pub fn print(self: HTTPHeader) void {
+            std.debug.print("{s} - {s}\n", .{
                 self.requestLine,
                 self.host,
-            ***REMOVED***);
-        ***REMOVED***
-    ***REMOVED***;
+            });
+        }
+    };
 
-    pub fn parseHeader(header: []const u8) !HTTPHeader ***REMOVED***
-        var headerStruct = HTTPHeader ***REMOVED***
+    pub fn parseHeader(header: []const u8) !HTTPHeader {
+        var headerStruct = HTTPHeader {
             .requestLine = undefined,
             .host = undefined,
             .userAgent = undefined,
-        ***REMOVED***;
+        };
         var headerIter = mem.tokenizeSequence(u8, header, " \r\n");
         headerStruct.requestLine = headerIter.next() orelse return ServerFileError.HeaderMalFormed;
-        while (headerIter.next()) |line| ***REMOVED***
+        while (headerIter.next()) |line| {
             const nameSlice = mem.sliceTo(line, ':');
             if(nameSlice.len == line.len) return ServerFileError.HeaderMalFormed;
             const headerName = std.meta.stringToEnum(HeaderNames,nameSlice) orelse continue;
             const headerValue = mem.trimLeft(u8, line[nameSlice.len + 1 ..], " ");
-            switch (headerName) ***REMOVED***
+            switch (headerName) {
                 .Host => headerStruct.host = headerValue,
                 .@"User-Agent" => headerStruct.userAgent = headerValue,
-            ***REMOVED***
-        ***REMOVED***
+            }
+        }
         return headerStruct;
-    ***REMOVED***
+    }
 
-    pub fn parsePath(requestLine: []const u8) ![]const u8 ***REMOVED***
+    pub fn parsePath(requestLine: []const u8) ![]const u8 {
         var requestLineIter = mem.tokenizeScalar(u8, requestLine, ' ');
         const method = requestLineIter.next().?;
         if (!mem.eql(u8,method,"GET")) return ServerFileError.MethodNotSupported;
@@ -73,54 +73,54 @@ pub const ServerS = struct ***REMOVED***
         if (path.len <= 0) return error.NoPath;
         var proto = requestLineIter.next().?;
         proto = mem.trim(u8, proto, " \r\n");
-        std.debug.print("proto: ***REMOVED***s***REMOVED***\n", .***REMOVED***proto***REMOVED***);
+        std.debug.print("proto: {s}\n", .{proto});
         //if (!mem.eql(u8, proto, "HTTP/1.1")) return ServerFileError.ProtocolNotSupported;
         if(mem.eql(u8,path,"/")) return "/index.html";
         return path;
-    ***REMOVED***
+    }
 
     /// Weird implementation of opening the file at the server
     /// If the file ends with .html, it will open the file as is
     /// If not, it will append .html to the file and try opening it again
     /// If the file is not found, it will return a 404 error
     /// Not the best implementation, but it works for now
-    pub fn openLocalFile(path: []const u8, allocator: anytype) ![]const u8 ***REMOVED***
+    pub fn openLocalFile(path: []const u8, allocator: anytype) ![]const u8 {
         const memory = std.heap.page_allocator;
         const maxSize = std.math.maxInt(usize);
         const localPath = path[1..];
         const endsWithHtml = checkFileEndsWithHtml(localPath);
         
-        if (endsWithHtml) ***REMOVED***
-            std.debug.print("HTML file ***REMOVED***s***REMOVED***\n", .***REMOVED***localPath***REMOVED***);
-            const file = fs.cwd().openFile(localPath, .***REMOVED******REMOVED***) catch |err| switch (err) ***REMOVED***
-                error.FileNotFound => ***REMOVED***
-                    std.debug.print("File not found: ***REMOVED***s***REMOVED***\n", .***REMOVED***localPath***REMOVED***);
+        if (endsWithHtml) {
+            std.debug.print("HTML file {s}\n", .{localPath});
+            const file = fs.cwd().openFile(localPath, .{}) catch |err| switch (err) {
+                error.FileNotFound => {
+                    std.debug.print("File not found: {s}\n", .{localPath});
                     return error.FileNotFound;
-                ***REMOVED***,
+                },
                 else => return err,
-                ***REMOVED***;
+                };
             defer file.close();
-            std.debug.print("file: ***REMOVED***any***REMOVED***\n", .***REMOVED***file***REMOVED***);
+            std.debug.print("file: {any}\n", .{file});
             return try file.readToEndAlloc(memory, maxSize);
-        ***REMOVED***else ***REMOVED*** //Needs to use GeneralPurposeAllocator to allocate memory, otherwise it will crash
+        }else { //Needs to use GeneralPurposeAllocator to allocate memory, otherwise it will crash
         // The purpose is to try and mimic must https servers that serve html files without the need of the extension, idk if it's a good idea lol
-            const newPath = try std.fmt.allocPrintZ(allocator, "***REMOVED***s***REMOVED***.html", .***REMOVED***path***REMOVED***);
+            const newPath = try std.fmt.allocPrintZ(allocator, "{s}.html", .{path});
             defer allocator.free(newPath);
-            std.debug.print("newPath: ***REMOVED***s***REMOVED***\n", .***REMOVED***newPath***REMOVED***); 
-            const file = fs.cwd().openFile(newPath[1..], .***REMOVED******REMOVED***) catch |err| switch (err) ***REMOVED***
-                error.FileNotFound => ***REMOVED***
-                    std.debug.print("File not found: ***REMOVED***s***REMOVED***\n", .***REMOVED***newPath***REMOVED***);
+            std.debug.print("newPath: {s}\n", .{newPath}); 
+            const file = fs.cwd().openFile(newPath[1..], .{}) catch |err| switch (err) {
+                error.FileNotFound => {
+                    std.debug.print("File not found: {s}\n", .{newPath});
                     return error.FileNotFound;
-                ***REMOVED***,
+                },
                 else => return err,
-                ***REMOVED***;
+                };
             defer file.close();
             return try file.readToEndAlloc(memory, maxSize);
-        ***REMOVED***
+        }
         return error.UnkownMimeType;
-    ***REMOVED***
+    }
 
-    pub fn http404() []const u8 ***REMOVED***
+    pub fn http404() []const u8 {
         return 
         \\ HTTP/1.1 404 NOT FOUND
         \\Connection: close
@@ -129,76 +129,76 @@ pub const ServerS = struct ***REMOVED***
         \\
         \\NOT FOUND
         ;
-    ***REMOVED***
+    }
 
-    pub fn mimeForPath(path: []const u8) ![]const u8 ***REMOVED***
+    pub fn mimeForPath(path: []const u8) ![]const u8 {
         const ext = std.fs.path.extension(path);
-        inline for (mimeTypes) |kv| ***REMOVED***
-            if (mem.eql(u8,ext,kv[0])) ***REMOVED***
+        inline for (mimeTypes) |kv| {
+            if (mem.eql(u8,ext,kv[0])) {
                 return kv[1];
-            ***REMOVED***
-        ***REMOVED***
+            }
+        }
         return "application/octet-stream";
-    ***REMOVED***
+    }
 
-    pub fn init(allocator: anytype) ServerS ***REMOVED***
-        return ServerS***REMOVED***
+    pub fn init(allocator: anytype) ServerS {
+        return ServerS{
             .server_addr = server_addr,
             .server_port = server_port,
             .allocator = allocator,
-        ***REMOVED***;
-    ***REMOVED***
+        };
+    }
 
-    pub fn start(self: *ServerS) !void ***REMOVED***
+    pub fn start(self: *ServerS) !void {
         //Initialize the server
         const self_addr = try net.Address.parseIp(self.server_addr, self.server_port);
-        var listener = try self_addr.listen(.***REMOVED***.reuse_address = true***REMOVED***);
-        std.debug.print("Listening on: ***REMOVED***s***REMOVED***:***REMOVED***d***REMOVED***\n", .***REMOVED***self.server_addr, self.server_port***REMOVED***);
+        var listener = try self_addr.listen(.{.reuse_address = true});
+        std.debug.print("Listening on: {s}:{d}\n", .{self.server_addr, self.server_port});
 
-        while (listener.accept()) |conn| ***REMOVED***
-            std.debug.print("Accepted connection from: ***REMOVED******REMOVED***\n", .***REMOVED***conn.address***REMOVED***);
+        while (listener.accept()) |conn| {
+            std.debug.print("Accepted connection from: {}\n", .{conn.address});
             var recv_buf: [4096]u8 = undefined;
             var recv_total: usize = 0;
-            while (conn.stream.read(recv_buf[recv_total..])) |recv_len| ***REMOVED***
+            while (conn.stream.read(recv_buf[recv_total..])) |recv_len| {
                 if (recv_len == 0) break;
                 recv_total += recv_len;
-                if (mem.containsAtLeast(u8, recv_buf[0..recv_total], 1, "\r\n\r\n")) ***REMOVED***
+                if (mem.containsAtLeast(u8, recv_buf[0..recv_total], 1, "\r\n\r\n")) {
                     break;
-                ***REMOVED***
-            ***REMOVED*** else |read_err| ***REMOVED***
+                }
+            } else |read_err| {
                 return read_err;
-            ***REMOVED***
+            }
             const recv_data = recv_buf[0..recv_total];
-            if (recv_data.len == 0) ***REMOVED***
-                std.debug.print("Got connection but no header!\n", .***REMOVED******REMOVED***);
+            if (recv_data.len == 0) {
+                std.debug.print("Got connection but no header!\n", .{});
                 continue;
-            ***REMOVED***
+            }
             const header = try parseHeader(recv_data);
             const path = try parsePath(header.requestLine);
             const mime = mimeForPath(path);
-            const buf = openLocalFile(path, self.allocator) catch |err| ***REMOVED***
-                if (err == error.FileNotFound) ***REMOVED***
+            const buf = openLocalFile(path, self.allocator) catch |err| {
+                if (err == error.FileNotFound) {
                     _ = try conn.stream.writer().write(http404());
                     continue;
-                ***REMOVED*** else ***REMOVED***
+                } else {
                     return err;
-                ***REMOVED***
-            ***REMOVED***;
-            std.debug.print("SENDING----\n", .***REMOVED******REMOVED***);
+                }
+            };
+            std.debug.print("SENDING----\n", .{});
             const httpHead =
                 "HTTP/1.1 200 OK \r\n" ++
                 "Connection: close\r\n" ++
-                "Content-Type: ***REMOVED***any***REMOVED***\r\n" ++
-                "Content-Length: ***REMOVED***any***REMOVED***\r\n" ++
+                "Content-Type: {any}\r\n" ++
+                "Content-Length: {any}\r\n" ++
                 "\r\n";
-            _ = try conn.stream.writer().print(httpHead, .***REMOVED*** mime, buf.len ***REMOVED***);
+            _ = try conn.stream.writer().print(httpHead, .{ mime, buf.len });
             _ = try conn.stream.writer().write(buf);
-        ***REMOVED*** else |err| ***REMOVED***
-            std.debug.print("error in accept: ***REMOVED***any***REMOVED***\n", .***REMOVED***err***REMOVED***);
-        ***REMOVED***
-    ***REMOVED***
+        } else |err| {
+            std.debug.print("error in accept: {any}\n", .{err});
+        }
+    }
 
-    pub fn checkFileEndsWithHtml(path: []const u8) bool ***REMOVED***
+    pub fn checkFileEndsWithHtml(path: []const u8) bool {
         return mem.endsWith(u8, path, ".html");
-    ***REMOVED***
-***REMOVED***;
+    }
+};

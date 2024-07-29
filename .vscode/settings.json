@@ -1,6 +1,6 @@
-***REMOVED***
-    "files.associations": ***REMOVED***
+{
+    "files.associations": {
         "stdlib.h": "c",
         "randomstring.h": "c"
-    ***REMOVED***
-***REMOVED***
+    }
+}

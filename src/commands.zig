@@ -1,6 +1,6 @@
 const std = @import("std");
 const ascii = std.ascii;
-    pub const command = enum ***REMOVED***
+    pub const command = enum {
         help,
         play,
         pause,
@@ -11,9 +11,9 @@ const ascii = std.ascii;
         volume,
         search,
         exit,
-    ***REMOVED***;
+    };
 
-pub const commands = struct ***REMOVED***
+pub const commands = struct {
     pub const helpCommand = 
     \\ Available commands:
     \\ - play - play the current song
@@ -27,14 +27,14 @@ pub const commands = struct ***REMOVED***
     \\ - exit - exit the program
 ;
 
-    pub fn handleCommand(comm: []u8) ![*:0]const u8 ***REMOVED***
+    pub fn handleCommand(comm: []u8) ![*:0]const u8 {
         // Trim whitespace and convert the input command to lowercase
         const trimmed_comm = std.mem.trim(u8, comm, " \t\n\r");        
         const case = std.meta.stringToEnum(command, trimmed_comm);
-        if (case == null) ***REMOVED***
+        if (case == null) {
             return "Invalid command, please try again!";
-        ***REMOVED***
-        const sel = switch (case.?) ***REMOVED***
+        }
+        const sel = switch (case.?) {
             command.help => helpCommand,
             command.play => "play",
             command.pause => "pause",
@@ -45,7 +45,7 @@ pub const commands = struct ***REMOVED***
             command.volume => "volume",
             command.search => "search",
             command.exit => "exit",
-        ***REMOVED***;
+        };
         return sel;
-    ***REMOVED***
-***REMOVED***;
+    }
+};

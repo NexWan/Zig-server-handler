@@ -1,4 +1,4 @@
-.***REMOVED***
+.{
     // This is the default name used by packages depending on this one. For
     // example, when a user runs `zig fetch --save <url>`, this field is used
     // as the key in the `dependencies` table. Although the user can choose a
@@ -31,12 +31,12 @@
     // Paths are relative to the build root. Use the empty string (`""`) to refer to
     // the build root itself.
     // A directory listed here means that all files within, recursively, are included.
-    .paths = .***REMOVED***
+    .paths = .{
         "build.zig",
         "build.zig.zon",
         "src",
         // For example...
         //"LICENSE",
         //"README.md",
-    ***REMOVED***,
-***REMOVED***
+    },
+}

@@ -12,7 +12,7 @@ const utils = @import("utils.zig").Utils;
 //    @cInclude("randomString.h"),
 //);
 
-var gpa = std.heap.GeneralPurposeAllocator(.***REMOVED******REMOVED***)***REMOVED******REMOVED***;
+var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
 
 pub const clifyMessage = 
@@ -41,33 +41,33 @@ pub const welcomeMessage =
 \\ Thank you for using Clify! love you <3
 ;
 
-pub fn main() !void ***REMOVED***
+pub fn main() !void {
     const reader = std.io.getStdIn().reader();
     try funcs.clearTerminal();
     try cli.printFmt(clifyMessage, colors.green);
     try funcs.resetAll();
     try cli.println(welcomeMessage);
-    while (true) ***REMOVED***
+    while (true) {
         try printPlayingBox();
         var buffer = std.ArrayList(u8).init(allocator);
         defer buffer.deinit();
-        while (reader.readByte() catch null) |byte| ***REMOVED***
+        while (reader.readByte() catch null) |byte| {
             if (byte == '\n') break;
             try buffer.append(byte);
-        ***REMOVED***
-        const command = commands.handleCommand(buffer.items) catch |err| ***REMOVED***
-            std.debug.print("Error: ***REMOVED***s***REMOVED***\n", .***REMOVED***err***REMOVED***);
+        }
+        const command = commands.handleCommand(buffer.items) catch |err| {
+            std.debug.print("Error: {s}\n", .{err});
             try cli.println("Invalid command, please try again!");
             continue;
-        ***REMOVED***;
+        };
         try cli.println(command);
-    ***REMOVED***
-***REMOVED***
+    }
+}
 
 
 
 /// Prints the playing box in the terminal
-pub fn printPlayingBox() !void ***REMOVED***
+pub fn printPlayingBox() !void {
     try cli.printFmt(playingBoxInit, colors.green);
     try cli.printFmt("\n    Now Playing: ", colors.yellow);
     try cli.printFmt("Song Name", colors.green);
@@ -75,55 +75,55 @@ pub fn printPlayingBox() !void ***REMOVED***
     try cli.printFmt("Artist Name\n", colors.green);
     try cli.printFmt(playingBoxEnd, colors.green);
     try cli.println("");
-***REMOVED***
+}
 
-test "HTTP test" ***REMOVED***
+test "HTTP test" {
     var req = requests.Requests.init(allocator);
     const url = "https://whatthecommit.com/index.txt";
-    req.get(url) catch |err| ***REMOVED***
-        std.debug.print("Error: ***REMOVED***any***REMOVED***\n", .***REMOVED***err***REMOVED***);
-    ***REMOVED***;
-***REMOVED***
+    req.get(url) catch |err| {
+        std.debug.print("Error: {any}\n", .{err});
+    };
+}
 
-test "Init config" ***REMOVED***
+test "Init config" {
     var config = try initConfig.init(allocator);
     const path = "config.json";
 
-    const parsed = config.readConfig(path) catch |err| ***REMOVED***
-        std.debug.print("Error: ***REMOVED***any***REMOVED***\n", .***REMOVED***err***REMOVED***);
+    const parsed = config.readConfig(path) catch |err| {
+        std.debug.print("Error: {any}\n", .{err});
         return;
-    ***REMOVED***;
+    };
 
     var root = parsed.value;
 
     const client = root.object.get("client_id").?;
     const secret = root.object.get("client_secret").?;
-    std.debug.print("Client: ***REMOVED***s***REMOVED***\n", .***REMOVED***client.string***REMOVED***);
-    std.debug.print("Secret: ***REMOVED***s***REMOVED***\n", .***REMOVED***secret.string***REMOVED***);
-***REMOVED***
+    std.debug.print("Client: {s}\n", .{client.string});
+    std.debug.print("Secret: {s}\n", .{secret.string});
+}
 
-test "Check file exists" ***REMOVED***
+test "Check file exists" {
     var config = try initConfig.init(allocator);
     const path = "config.json";
     const exists = try config.checkConfigExists(path);
-    std.debug.print("Exists: ***REMOVED***any***REMOVED***\n", .***REMOVED***exists.exists***REMOVED***);
-***REMOVED***
+    std.debug.print("Exists: {any}\n", .{exists.exists});
+}
 
-test "Write to JSON" ***REMOVED***
+test "Write to JSON" {
     const path = "config.json";
     var config = try initConfig.init(allocator);
     try config.writeInitSettings(path);
-***REMOVED***
+}
 
-test "HTTP server" ***REMOVED***
+test "HTTP server" {
     var server = Server.init(allocator);
     _ = try server.start();
-***REMOVED***
+}
 
 
-test "Generate random string" ***REMOVED***
+test "Generate random string" {
     const length = 10;
     const randomString = try utils.generateRandomString(allocator,length);
     defer allocator.free(randomString);
     try cli.println(randomString);
-***REMOVED***
+}
