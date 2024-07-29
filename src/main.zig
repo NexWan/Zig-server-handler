@@ -77,48 +77,48 @@ pub fn printPlayingBox() !void ***REMOVED***
     try cli.println("");
 ***REMOVED***
 
-//test "HTTP test" ***REMOVED***
-//    var req = requests.Requests.init(allocator);
-//    const url = "https://whatthecommit.com/index.txt";
-//    req.get(url) catch |err| ***REMOVED***
-//        std.debug.print("Error: ***REMOVED***any***REMOVED***\n", .***REMOVED***err***REMOVED***);
-//    ***REMOVED***;
-//***REMOVED***
+test "HTTP test" ***REMOVED***
+    var req = requests.Requests.init(allocator);
+    const url = "https://whatthecommit.com/index.txt";
+    req.get(url) catch |err| ***REMOVED***
+        std.debug.print("Error: ***REMOVED***any***REMOVED***\n", .***REMOVED***err***REMOVED***);
+    ***REMOVED***;
+***REMOVED***
 
-//test "Init config" ***REMOVED***
-    //var config = try initConfig.init(allocator);
-   // const path = "config.json";
+test "Init config" ***REMOVED***
+    var config = try initConfig.init(allocator);
+    const path = "config.json";
 
-  //  const parsed = config.readConfig(path) catch |err| ***REMOVED***
- //       std.debug.print("Error: ***REMOVED***any***REMOVED***\n", .***REMOVED***err***REMOVED***);
- //       return;
-//    ***REMOVED***;
+    const parsed = config.readConfig(path) catch |err| ***REMOVED***
+        std.debug.print("Error: ***REMOVED***any***REMOVED***\n", .***REMOVED***err***REMOVED***);
+        return;
+    ***REMOVED***;
 
-//    var root = parsed.value;
+    var root = parsed.value;
 
-//    const client = root.object.get("client_id").?;
-//    const secret = root.object.get("client_secret").?;
-//    std.debug.print("Client: ***REMOVED***s***REMOVED***\n", .***REMOVED***client.string***REMOVED***);
-//    std.debug.print("Secret: ***REMOVED***s***REMOVED***\n", .***REMOVED***secret.string***REMOVED***);
-//***REMOVED***
+    const client = root.object.get("client_id").?;
+    const secret = root.object.get("client_secret").?;
+    std.debug.print("Client: ***REMOVED***s***REMOVED***\n", .***REMOVED***client.string***REMOVED***);
+    std.debug.print("Secret: ***REMOVED***s***REMOVED***\n", .***REMOVED***secret.string***REMOVED***);
+***REMOVED***
 
-//test "Check file exists" ***REMOVED***
-//    var config = try initConfig.init(allocator);
-//    const path = "config.json";
-//    const exists = try config.checkConfigExists(path);
-//    std.debug.print("Exists: ***REMOVED***any***REMOVED***\n", .***REMOVED***exists.exists***REMOVED***);
-//***REMOVED***
+test "Check file exists" ***REMOVED***
+    var config = try initConfig.init(allocator);
+    const path = "config.json";
+    const exists = try config.checkConfigExists(path);
+    std.debug.print("Exists: ***REMOVED***any***REMOVED***\n", .***REMOVED***exists.exists***REMOVED***);
+***REMOVED***
 
-//test "Write to JSON" ***REMOVED***
-//    const path = "config.json";
-//    var config = try initConfig.init(allocator);
-//    try config.writeInitSettings(path);
-//***REMOVED***
+test "Write to JSON" ***REMOVED***
+    const path = "config.json";
+    var config = try initConfig.init(allocator);
+    try config.writeInitSettings(path);
+***REMOVED***
 
-//test "HTTP server" ***REMOVED***
- //   var server = Server.init(allocator);
-  //  _ = try server.start();
-//***REMOVED***
+test "HTTP server" ***REMOVED***
+    var server = Server.init(allocator);
+    _ = try server.start();
+***REMOVED***
 
 
 test "Generate random string" ***REMOVED***
