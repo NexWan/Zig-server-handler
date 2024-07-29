@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "randomString.h"
 
 char* rand_str(size_t length) ***REMOVED***
     char charset[] = "0123456789"

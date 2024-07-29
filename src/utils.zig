@@ -85,20 +85,23 @@ pub const InitCheck = struct ***REMOVED***
 
 pub const Utils = struct ***REMOVED***
     pub fn generateRandomString(allocator: std.mem.Allocator,length: usize) ![]const u8 ***REMOVED***
-        var rnd = std.rand.DefaultPrng.init(0);
-        const buffer = try allocator.alloc(u8,length);
-        defer allocator.free(buffer);
+        const RndGen = std.rand.DefaultPrng;
+        const charSet = [_]u8***REMOVED***
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        ***REMOVED***;
 
-        for (buffer) |*ptr| ***REMOVED***
-            const random = rnd.next() % 62;
-            if (random < 10) ***REMOVED*** 
-                ptr.* = @intCast(('0') + random);
-            ***REMOVED***
-            else if (random < 36)  ***REMOVED***
-                ptr.* = @intCast(('a') + random - 10);
-            ***REMOVED***
-            else ptr.* = @intCast(('A') + random - 36);
+        var seed:u64 = undefined;
+        std.posix.getrandom(std.mem.asBytes(&seed)) catch unreachable;
+        var rnd =  RndGen.init(seed);
+
+        const randomString = try allocator.alloc(u8, length);
+
+        for (randomString) |*char| ***REMOVED***
+            const some_random = rnd.random().intRangeLessThan(usize,0,charSet.len);
+            char.* = charSet[some_random];
         ***REMOVED***
-        return buffer;
+        return randomString;
     ***REMOVED***
 ***REMOVED***;

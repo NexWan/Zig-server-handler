@@ -8,10 +8,9 @@ const requests = @import("requests.zig");
 const initConfig = @import("utils.zig").InitCheck;
 const Server = @import("server.zig").ServerS;
 const utils = @import("utils.zig").Utils;
-const randomString = @cImport( ***REMOVED***
-    @cInclude("randomString.h");
-***REMOVED***);
-
+//const randomString = @cImport(
+//    @cInclude("randomString.h"),
+//);
 
 var gpa = std.heap.GeneralPurposeAllocator(.***REMOVED******REMOVED***)***REMOVED******REMOVED***;
 const allocator = gpa.allocator();
@@ -124,6 +123,7 @@ pub fn printPlayingBox() !void ***REMOVED***
 
 test "Generate random string" ***REMOVED***
     const length = 10;
-    const random = randomString.rand_str(length);
-    std.debug.print("Random: ***REMOVED***s***REMOVED***\n", .***REMOVED***random***REMOVED***);
+    const randomString = try utils.generateRandomString(allocator,length);
+    defer allocator.free(randomString);
+    try cli.println(randomString);
 ***REMOVED***

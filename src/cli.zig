@@ -28,7 +28,7 @@ pub const funcs = struct ***REMOVED***
 
 pub const cli = struct ***REMOVED***
     colour: [*:0]const u8,
-    pub fn println(message: [*:0]const u8) !void ***REMOVED***
+    pub fn println(message:anytype) !void ***REMOVED***
         const stdout = std.io.getStdOut().writer();
         try stdout.print("***REMOVED***s***REMOVED***\n", .***REMOVED***message***REMOVED***);
     ***REMOVED***

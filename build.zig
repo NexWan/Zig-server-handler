@@ -22,16 +22,16 @@ pub fn build(b: *std.Build) void ***REMOVED***
         .optimize = optimize,
     ***REMOVED***);
 
-    exe.addCSourceFile( .***REMOVED***
-        .file = b.path("c/randomString.c"),
-        .flags = &.***REMOVED******REMOVED***,
-    ***REMOVED***);
-    exe.addIncludePath(b.path("c"));
-    exe.addIncludePath(.***REMOVED***
-        .cwd_relative = "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\ucrte",
-    ***REMOVED***);
+    //exe.addCSourceFile( .***REMOVED***
+    //    .file = b.path("c/randomString.c"),
+    //    .flags = &.***REMOVED******REMOVED***,
+    //***REMOVED***);
+    //exe.addIncludePath(b.path("c"));
+    //exe.addIncludePath(.***REMOVED***
+    //    .cwd_relative = "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\ucrte",
+    //***REMOVED***);
 
-    exe.linkLibC();
+    //exe.linkLibC();
 
     
     // This declares intent for the executable to be installed into the
@@ -78,15 +78,16 @@ pub fn build(b: *std.Build) void ***REMOVED***
         .optimize = optimize,
     ***REMOVED***);
 
-    exe_unit_tests.linkLibC();
-    exe_unit_tests.addIncludePath(b.path("c"));
-    exe_unit_tests.addIncludePath(.***REMOVED***
-        .cwd_relative = "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\ucrte",
-    ***REMOVED***);
-    exe_unit_tests.addCSourceFile( .***REMOVED***
-        .file = b.path("c/randomString.c"),
-        .flags = &.***REMOVED******REMOVED***,
-    ***REMOVED***);
+    //exe_unit_tests.linkLibC();
+    //exe_unit_tests.addIncludePath(b.path("c"));
+    //exe_unit_tests.addSystemIncludePath(b.path("c"));
+    //exe_unit_tests.addIncludePath(.***REMOVED***
+    //    .cwd_relative = "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22000.0\\ucrte",
+    //***REMOVED***);
+    //exe_unit_tests.addCSourceFile( .***REMOVED***
+    //    .file = b.path("c/randomString.c"),
+    //    .flags = &.***REMOVED******REMOVED***,
+    //***REMOVED***);
 
     const run_exe_unit_tests = b.addRunArtifact(exe_unit_tests);
 
